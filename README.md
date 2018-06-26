@@ -13,4 +13,5 @@ Implementations using *C* language: (compiled with C99)
 Implementations using *Java* language:
 
 - Stack
+- Queue
 - Binary Search Tree (BST)
