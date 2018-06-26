@@ -268,38 +268,3 @@ void print_table(hashtable *hashtable){
     }
     printf("\n");
 }
-
-
-/*int main(){
-    user *a = malloc(sizeof(user));
-    strcpy(a->name, "Miguel");
-    strcpy(a->nick, "eu");
-
-    user *b = malloc(sizeof(user));
-    strcpy(b->name, "luis");
-    strcpy(b->nick, "tu");
-
-    user *c = malloc(sizeof(user));
-    strcpy(c->name, "joao");
-    strcpy(c->nick, "ele");
-
-    user *d = malloc(sizeof(user));
-    strcpy(d->name, "rita");
-    strcpy(d->nick, "nos");
-
-    hashtable2 *ht = create();
-    hashtable2 *vt = create();
-
-    insert2(ht, a);
-    insert2(ht, b);
-    insert2(ht, c);
-    if(load_factor(ht))
-        ht = resize_hashtable2(ht);
-    insert2(ht, d);
-    print_table(ht);
-    printf("\n");
-    user *tmp = get_item(ht, "ele");
-
-
-    return 0;
-}*/
