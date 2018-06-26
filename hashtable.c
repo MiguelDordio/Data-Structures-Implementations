@@ -7,7 +7,7 @@
 #include "stdbool.h"
 #include "stdlib.h"
 
-#define initial_size 3500000
+#define initial_size 23
 #define max 3000000
 #define NICKSIZE 6
 
