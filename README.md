@@ -8,6 +8,8 @@ Implementations using *C* language: (compiled with C99)
 
 - Hashtable
 - LinkedList
+- Queue
+- B-Tree (in progress)
 
 
 Implementations using *Java* language:
