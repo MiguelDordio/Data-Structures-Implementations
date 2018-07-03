@@ -9,7 +9,7 @@ Implementations using *C* language: (compiled with C99)
 - Hashtable
 - LinkedList
 - Queue
-- B-Tree (in progress)
+- B-Tree (implemented in secundary memory, using binary files as a "database") - (in progress)
 
 
 Implementations using *Java* language:
