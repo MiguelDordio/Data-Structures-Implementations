@@ -12,7 +12,7 @@ typedef struct btNode btNode;
 typedef struct bTree bTree;
 
 /* create a new empty tree */
-bTree *btCreate(FILE *fp, int order);
+bTree *btCreate(int order);
 
 /* free a tree */
 void btDestroy(btNode t);

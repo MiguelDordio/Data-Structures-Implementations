@@ -224,50 +224,62 @@ btNode new_node(int order, int is_leaf) {
 }
 
 void bt_split_child(btNode x, int pos, bTree *tree, FILE *fp){
-    int t = (tree->order/2);
 
-    btNode y = disk_read(x.kids[pos], tree->order, fp);
-    tree->node_count++;
-    y.pos_in_disk = tree->node_count;
-    btNode z = new_node(tree->order, y.isLeaf);
-    tree->node_count++;
-    z.pos_in_disk = tree->node_count;
-    z.numKeys = t-1;
+    btNode y = disk_read(x.kids[pos], tree->order, fp); // node to split (pos-th child)
+    tree->node_count++;                                 // increment nº of total nodes
+    y.pos_in_disk = tree->node_count;                   // attribute a new location in the file
+    btNode z = new_node(tree->order, y.isLeaf);         // new (pos+1)-th child
+    tree->node_count++;                                 // increment nº of total nodes
+    z.pos_in_disk = tree->node_count;                   // attribute a new location in the file
+    int t = (tree->order / 2);                          // calculate minimum ramification degree
 
-    for(int j = 1; j < t-1; j++){
-        z.keys[j] = y.keys[j+t];
+    if(tree->order % 2 == 0){
+        t--;
+    }
+    z.numKeys = t;                                      // nº of keys the new node will receive
+
+    if(tree->order % 2 != 0){
+        t--;
+    }
+    for(int j = 0; j <= t && (j+t+1)<= y.numKeys-1; j++){                        // move elements to new node
+        z.keys[j] = y.keys[j+t+1];
+        y.keys[j+t+1].key = -1;                         // erase the element from the previous node
+        y.keys[j+t+1].data = -1;
     }
 
-    if(y.isLeaf == 0){ // if y is not a leaf
-        for(int j = 1; j < t; j++){
-            z.kids[j] = y.kids[j+t];
+    if(y.isLeaf == 0){                                  // if y is not a leaf
+        for(int j = 0; j <= t; j++){                    // move children as well
+            z.kids[j] = y.kids[j+t+1];
+            y.kids[j+t+1] = -1;                         // erase the element from the previous node
         }
     }
-    y.numKeys = t-1;
+    y.numKeys = t;                                      // update the nº of keys the node has after split
 
-    for(int j = x.numKeys +1; j > pos+1; j--){
+    for(int j = x.numKeys; j > pos+1; j--){             // make room for x`s new child
         x.kids[j+1] = x.kids[j];
     }
+    x.kids[pos] = y.pos_in_disk;
     x.kids[pos+1] = z.pos_in_disk;
 
-    for(int j = x.numKeys; j > pos; j--){
-        x.keys[j+1] = x.keys[j];
+    for(int j = x.numKeys; j > pos; j--){               // make room for the element
+        x.keys[j+1] = x.keys[j];                        // that will be promoted
     }
-    x.keys[pos] = y.keys[t];
-    y.keys[t].key = -1;
-    y.keys[t].data = -1;
-    x.numKeys++;
 
-    disk_write(x, tree->order, fp);
-    disk_write(y, tree->order, fp);
-    disk_write(z, tree->order, fp);
+    x.keys[pos] = y.keys[t];                            // promote element
+    y.keys[t].key = -1;                                 // erase the updated element from the previous node
+    y.keys[t].data = -1;
+    x.numKeys++;                                        // increment the nº of keys the root node has
+
+    disk_write(x, tree->order, fp);                     // update the information in the file
+    disk_write(y, tree->order, fp);                     // update the information in the file
+    disk_write(z, tree->order, fp);                     // update the information in the file
 }
 
 btNode bt_insert_nonfull(btNode node, element key, bTree *tree, FILE *fp){
 
     int pos = node.numKeys;
 
-    if(node.isLeaf == 1){ // if in a leaf insert the new element
+    if(node.isLeaf == 1){                                       // if in a leaf insert the new element
         int i = pos-1;
         while(i >= 0 && key.key < node.keys[i].key){
             node.keys[i+1] = node.keys[i];
@@ -283,13 +295,12 @@ btNode bt_insert_nonfull(btNode node, element key, bTree *tree, FILE *fp){
         node.numKeys++;
         disk_write(node, tree->order, fp);
         return node;
-    }else{  // otherwise, descend to the appropriate child
-        pos--;
+    }else{                                                      // otherwise, descend to the appropriate child
         while (pos >= 1 && key.key < node.keys[pos].key) {
             pos--;
         }
         btNode x = disk_read(node.kids[pos], tree->order, fp);
-        if(x.numKeys == tree->order -1){  // is this child full?
+        if(x.numKeys == tree->order -1){                        // is this child full?
             bt_split_child(node, pos, tree, fp);
             if(key.key > node.keys[pos].key)
                 pos++;
@@ -304,18 +315,18 @@ btNode bt_insert_nonfull(btNode node, element key, bTree *tree, FILE *fp){
 //#############################################################################
 
 
-bTree *btCreate(FILE *fp, int order){
+bTree *btCreate(int order){
 
-    bTree *tree; /* creates the "header" of the B-Tree */
-    if((tree = malloc(sizeof(bTree))) == NULL)
+    bTree *tree;                                // creates the "header" of the B-Tree
+    if((tree = malloc(sizeof(bTree))) == NULL)  // allocate space for the new tree
         return NULL;
 
-    btNode root = new_node(order, true); /* creates the root of the new B-Tree */
-    root.pos_in_disk = 0;
+    btNode root = new_node(order, true);        // creates the root of the new B-Tree
+    root.pos_in_disk = 0;                       // give the root a position in the file
 
-    tree->order = order;
-    tree->root = root;
-    tree->node_count = 0;
+    tree->order = order;                        // give the tree it`s order
+    tree->root = root;                          // give the tree it`s root
+    tree->node_count = 0;                       // set the tree`s node count to 0
 
     return tree;
 
@@ -325,16 +336,15 @@ void btInsert(bTree *tree, element key, FILE *fp){
 
     btNode root = tree->root;
 
-    if(root.numKeys == tree->order-1){ // if the root is full
-        btNode s = new_node(tree->order, 0);
-        s.kids[1] = root.pos_in_disk;
-        bt_split_child(s, 1, tree, fp);
-        s = disk_read(0, tree->order, fp);
-        tree->root = s;
-        bt_insert_nonfull(s, key, tree, fp);
-        //tree->node_count += 2;
+    if(root.numKeys == tree->order-1){                        // if the root is full
+        btNode s = new_node(tree->order, 0);                  // create a new root node
+        s.kids[0] = root.pos_in_disk;                         // root becomes the first child
+        bt_split_child(s, 0, tree, fp);                       // split the root
+        s = disk_read(0, tree->order, fp);                    // get the new root
+        tree->root = s;                                       // make it the new root after the split
+        bt_insert_nonfull(s, key, tree, fp);                  // now insert the new element
     }else{
-        tree->root = bt_insert_nonfull(root, key, tree, fp);
+        tree->root = bt_insert_nonfull(root, key, tree, fp);  // insert the new element in a non-full node
     }
 
 }
@@ -376,7 +386,7 @@ void print_node_keys(btNode node, int order){
 
 void btPrintTree(bTree *tree, FILE *fp){
     queue *q = createQueue(6);
-    //print_node_keys(tree->root, tree->order);
+
     insert(q, tree->root);
 
     while(!isEmpty(q)){
@@ -402,28 +412,17 @@ int main(){
 
     FILE *fp;
     fp = fopen("file.bin", "wb+");
-    bTree *tree = btCreate(fp, 4);
+    bTree *tree = btCreate(4);
     btInsert(tree, n2, fp);
     btInsert(tree, n1, fp);
     btInsert(tree, n3, fp);
+    btInsert(tree, n4, fp);
 
-    btNode x = disk_read(0, tree->order, fp);
-    printf("\n[");
-    for(int i = 0; i < tree->order-1; i++){ // insert all the kids os the root in the queue
-        printf("key: %d, ", x.keys[i].key);
-    }
-    printf("]\n");
 
-    //btInsert(tree, n4, fp);
+    btPrintTree(tree, fp);
 
-    //btPrintTree(tree, fp);
-
-    btNode x1 = disk_read(0, tree->order, fp);
-    printf("\n[");
-    for(int i = 0; i < tree->order-1; i++){ // insert all the kids os the root in the queue
-        printf("key: %d, ", x1.keys[i].key);
-    }
-    printf("]\n");
+    if(btSearch(tree->root, tree->order, n2, fp) != 1)
+        printf("found it!");
 
     return 0;
 }
