@@ -1,12 +1,29 @@
-#include <stdbool.h>
+#ifndef QUEUE_H
+# define QUEUE_H
+
+
 #include "btree.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
 
 //#############################################################################
 //                               STRUCTS USED
 //#############################################################################
 
-typedef struct queue queue;
+typedef struct element element;
+typedef struct btNode btNode;
+typedef struct bTree bTree;
+
+typedef struct queue{
+    int size;
+    int front;
+    int rear;
+    int itemCount;
+    btNode *list;
+}queue;
 
 //#############################################################################
 //                               METHODS
@@ -20,3 +37,4 @@ int size(queue *q);
 void insert(queue *q ,btNode data);
 btNode removeData(queue *q);
 
+#endif
