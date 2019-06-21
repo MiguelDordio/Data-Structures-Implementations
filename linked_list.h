@@ -1,22 +1,38 @@
-#ifndef LINKEDLIST_LINKED_LIST_H
-#define LINKEDLIST_LINKED_LIST_H
-
-
 #include <malloc.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
+#include "hashtable2.h"
+
+#define AIRPORTCODESIZE 5
+
+
 
 typedef struct node{
-    int data;
+    char airport_code[AIRPORTCODESIZE];
+    short flight_time;
+    short flights_size;
+    flight *flights;
     struct node *next;
 }node;
 
-node *search(node *head, int key);
 
-node *insert(node *head, int key);
+typedef struct linked_list{
+    int size;
+    node *head;
+}linked_list;
 
-bool delete(node **head, int key);
 
-void printReverse(node* head);
+linked_list *create_new();
 
-#endif //LINKEDLIST_LINKED_LIST_H
+bool empty(linked_list *linked);
+
+node *get_node(linked_list *linked, char *airport_code);
+
+bool exists(linked_list *linked, char *airport_code);
+
+void insert_new(linked_list *linked, char *airport_code);
+
+bool delete(linked_list *linked, char *airport_code);
+
+void print(linked_list *linked);
