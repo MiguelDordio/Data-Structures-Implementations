@@ -11,6 +11,7 @@ Implementations using *C* language: (compiled with C99)
 - Queue
 - B-Tree
 - Stack
+- Binary Heap
 
 
 Implementations using *Java* language:
