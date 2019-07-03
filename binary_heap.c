@@ -25,12 +25,14 @@ void swap(int *heap, int indexOne, int indexTwo){
     heap[indexTwo] = tmp;
 }
 
+
 heap *increseHeapSize(heap *h){
     h->capacity += 10;
     int *items = realloc(h->h, sizeof(int) * (h->capacity));
     h->h = items;
     return h;
 }
+
 
 void heapifyDown(heap *h) {
     int index = 0;
@@ -48,6 +50,7 @@ void heapifyDown(heap *h) {
     }
 }
 
+
 void heapifyUp(heap *h) {
     int index = h->size-1;
     while(hasParent(index) && parent(h, index) > h->h[index]){
@@ -55,6 +58,7 @@ void heapifyUp(heap *h) {
         index = getParentIndex(index);
     }
 }
+
 
 heap *create_heap(int capacity){
     heap *h = malloc(sizeof(heap));
@@ -66,10 +70,12 @@ heap *create_heap(int capacity){
     return h;
 }
 
+
 int minimun(heap *h){
     assert(h->size > 0);
     return h->h[0];
 }
+
 
 int extract_min(heap *h){
     assert(h->size > 0);
@@ -80,6 +86,7 @@ int extract_min(heap *h){
     return item;
 }
 
+
 void add(heap *h, int item){
     if(h->size == h->capacity)
         h = increseHeapSize(h);
@@ -88,11 +95,28 @@ void add(heap *h, int item){
     heapifyUp(h);
 }
 
+
 void print_heap(heap *h){
     for(int i = 0; i < h->size; i++)
         printf("%d ", h->h[i]);
     printf("\n");
 }
+
+
+void decrease_key(heap *h, int i, int key){
+    h->h[i] = key;
+    while(hasParent(i) && parent(h, i) > h->h[i]){
+        swap(h->h, getParentIndex(i), i);
+        i = getParentIndex(i);
+    }
+}
+
+
+void destroyHeap(heap *h){
+    free(h->h);
+    free(h);
+}
+
 
 int main(){
     heap *h = create_heap(2);
@@ -106,5 +130,3 @@ int main(){
     extract_min(h);
     print_heap(h);
 }
-
-
